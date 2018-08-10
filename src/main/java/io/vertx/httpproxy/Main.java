@@ -9,17 +9,28 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
+
 public class Main {
 
+  private static final Logger log = LoggerFactory.getLogger(Main.class);
+  
   @Parameter(names = "--port")
   public int port = 8080;
 
   @Parameter(names = "--address")
   public String address = "0.0.0.0";
+
+  @Parameter(names = "--destinationAddress")
+  public String destinationAddress = "destserver";
+
+  @Parameter(names = "--destinationPort")
+  public int destinationPort = 443;
 
   public static void main(String[] args) {
     Main main = new Main();
@@ -30,25 +41,31 @@ public class Main {
 
   public void run() {
     InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE);
+
     Vertx vertx = Vertx.vertx();
     HttpClient client = vertx.createHttpClient(new HttpClientOptions()
         .setMaxInitialLineLength(10000)
+        .setSsl(true).setTrustAll(true)
         .setLogActivity(true));
+
     HttpProxy proxy = HttpProxy
         .reverseProxy(client)
-        .target(8081, "96.126.115.136");
+        .target(destinationPort, destinationAddress);
+
     HttpServer proxyServer = vertx.createHttpServer(new HttpServerOptions()
         .setPort(port)
         .setMaxInitialLineLength(10000)
         .setLogActivity(true))
         .requestHandler(req -> {
-          System.out.println("------------------------------------------");
-          System.out.println(req.path());
+          log.info("path: "+ req.path()+" params: "+req.params());
           proxy.handle(req);
         });
+
     proxyServer.listen(ar -> {
       if (ar.succeeded()) {
-        System.out.println("Proxy server started on " + port);
+        log.info("Proxy server started on " + port);
+        log.info("destination address " + destinationAddress);
+        log.info("destination port " + destinationPort);
       } else {
         ar.cause().printStackTrace();
       }
