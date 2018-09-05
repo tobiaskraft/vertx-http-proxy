@@ -28,7 +28,7 @@ import java.util.function.Function;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @RunWith(VertxUnitRunner.class)
-public class ProxyTestBase {
+abstract public class ProxyTestBase {
 
   protected HttpServerOptions proxyOptions;
   protected HttpClientOptions clientOptions;
