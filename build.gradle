@@ -1,6 +1,9 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'idea'
+plugins {
+    id 'java'
+    id 'maven'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
 
 group = 'io.vertx'
 version = '1.0.0'
@@ -43,3 +46,9 @@ task packageTests(type: Jar) {
     classifier = 'tests'
 }
 artifacts.archives packageTests
+
+mainClassName = 'io.vertx.httpproxy.Main'
+
+shadowJar {
+    version = null
+}
