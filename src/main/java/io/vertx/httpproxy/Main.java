@@ -15,22 +15,24 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-
 public class Main {
 
   private static final Logger log = LoggerFactory.getLogger(Main.class);
-  
+
   @Parameter(names = "--port")
-  public int port = 8080;
+  private int port = 8080;
 
   @Parameter(names = "--address")
-  public String address = "0.0.0.0";
+  private String address = "0.0.0.0";
 
   @Parameter(names = "--destinationAddress")
-  public String destinationAddress = "destserver";
+  private String destinationAddress = "<destURL>";
 
   @Parameter(names = "--destinationPort")
-  public int destinationPort = 443;
+  private int destinationPort = 443;
+
+  @Parameter(names = "--destinationHTTPS")
+  private boolean destinationHTTPS = false;
 
   public static void main(String[] args) {
     Main main = new Main();
@@ -45,7 +47,7 @@ public class Main {
     Vertx vertx = Vertx.vertx();
     HttpClient client = vertx.createHttpClient(new HttpClientOptions()
         .setMaxInitialLineLength(10000)
-        .setSsl(true).setTrustAll(true)
+        .setSsl(destinationHTTPS).setTrustAll(true)
         .setLogActivity(true));
 
     HttpProxy proxy = HttpProxy
@@ -57,7 +59,7 @@ public class Main {
         .setMaxInitialLineLength(10000)
         .setLogActivity(true))
         .requestHandler(req -> {
-          log.info("path: "+ req.path()+" params: "+req.params());
+          log.info("request path: " + req.path() + " params: " + req.params());
           proxy.handle(req);
         });
 
@@ -66,6 +68,7 @@ public class Main {
         log.info("Proxy server started on " + port);
         log.info("destination address " + destinationAddress);
         log.info("destination port " + destinationPort);
+        log.info("destination uses HTTPS " + destinationHTTPS);
       } else {
         ar.cause().printStackTrace();
       }
