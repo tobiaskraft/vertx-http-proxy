@@ -29,7 +29,7 @@ public class Main {
   private String destinationAddress = "<destURL>";
 
   @Parameter(names = "--destinationPort")
-  private int destinationPort = 443;
+  private int destinationPort = 80;
 
   @Parameter(names = "--destinationHTTPS")
   private boolean destinationHTTPS = false;
